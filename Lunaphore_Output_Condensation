@@ -1,1 +1,28 @@
-Condenses single channel tiff images into one multi-channel tiff images
+#Condenses single channel tiff images into one multi-channel tiff images
+
+import numpy as np
+import glob
+from tifffile import *
+import re
+
+whole_data = "PATH_TO_FILE_WITH_MULTIPLE_CYCLES_OF_SINGLE_CHANNEL_IMAGES/*"
+#NUM_CYCLES = 3
+
+for idx, val in enumerate(glob.glob(whole_data)):
+    print(idx)
+    file_name = val + "/*"
+    each_set = set()
+    list_of_files = []
+    for j in glob.glob(file_name):
+        list_of_files.append(j)
+        string = '_'.join(map(str,((j.split("_"))[-4:])))
+        each_set.add(string)
+    each_set = list(each_set)
+    for element in each_set:
+        print(element)
+        new = sorted([k for k in list_of_files if element in k])
+        print(new)
+        img = np.stack((imread(new[0]), imread(new[1]), imread(new[2])))
+        print(img.shape)
+        imwrite(f"merged_Cycle_{idx+1}_{element}", img, imagej=True, photometric='minisblack', metadata={'axes': 'CYX'},)
+            
